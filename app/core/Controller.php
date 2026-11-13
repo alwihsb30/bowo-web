@@ -18,6 +18,32 @@ class Controller
         return new $modelName();
     }
 
+    protected function requireLogin()
+    {
+        if (empty($_SESSION['user_id'])) {
+            $this->setFlash('error', 'Silakan login terlebih dahulu.');
+            $this->redirect('index.php?c=auth&a=login');
+        }
+    }
+
+    protected function requireAdmin()
+    {
+        $this->requireLogin();
+        if ($_SESSION['role'] !== 'admin') {
+            $this->setFlash('error', 'Halaman tersebut khusus untuk Administrator.');
+            $this->redirect('index.php?c=deposit&a=dashboard');
+        }
+    }
+
+    protected function requireNasabah()
+    {
+        $this->requireLogin();
+        if ($_SESSION['role'] !== 'nasabah') {
+            $this->setFlash('error', 'Halaman tersebut khusus untuk Nasabah.');
+            $this->redirect('index.php?c=transaction&a=dashboard');
+        }
+    }
+
     protected function redirect($path)
     {
         header('Location: ' . BASE_URL . '/' . ltrim($path, '/'));
