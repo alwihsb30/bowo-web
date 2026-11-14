@@ -26,4 +26,45 @@ class WasteType extends Model
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    public function createWasteType($data)
+    {
+        $sql = "INSERT INTO waste_types (name, category, price_per_kg, description, status)
+                VALUES (:name, :category, :price_per_kg, :description, :status)";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(array(
+            'name'         => $data['name'],
+            'category'     => $data['category'],
+            'price_per_kg' => (float)$data['price_per_kg'],
+            'description'  => $data['description'],
+            'status'       => $data['status']
+        ));
+    }
+
+    public function updateWasteType($id, $data)
+    {
+        $sql = "UPDATE waste_types
+                SET name = :name,
+                    category = :category,
+                    price_per_kg = :price_per_kg,
+                    description = :description,
+                    status = :status
+                WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(array(
+            'name'         => $data['name'],
+            'category'     => $data['category'],
+            'price_per_kg' => (float)$data['price_per_kg'],
+            'description'  => $data['description'],
+            'status'       => $data['status'],
+            'id'           => (int)$id
+        ));
+    }
+
+    public function deleteById($id)
+    {
+        $sql  = "DELETE FROM waste_types WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute(array('id' => (int)$id));
+    }
 }
