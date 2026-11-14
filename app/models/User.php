@@ -56,4 +56,27 @@ class User extends Model
         ));
         return (int)$this->db->lastInsertId();
     }
+
+    public function getLeaderboard()
+    {
+        $sql = "SELECT u.id, u.name, u.username, u.points, u.balance,
+                       IFNULL(SUM(d.weight), 0) AS total_weight
+                FROM users u
+                LEFT JOIN deposits d ON d.user_id = u.id AND d.status = 'diverifikasi'
+                WHERE u.role = 'nasabah' AND u.status = 'active'
+                GROUP BY u.id, u.name, u.username, u.points, u.balance
+                ORDER BY u.points DESC, u.balance DESC
+                LIMIT 10";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function countNasabah()
+    {
+        $sql  = "SELECT COUNT(*) FROM users WHERE role = 'nasabah'";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return (int)$stmt->fetchColumn();
+    }
 }
