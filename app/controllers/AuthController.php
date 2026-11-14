@@ -80,6 +80,73 @@ class AuthController extends Controller
         $this->redirect('index.php?c=deposit&a=dashboard');
     }
 
+    public function register()
+    {
+        if (!empty($_SESSION['user_id'])) {
+            if ($_SESSION['role'] === 'admin') {
+                $this->redirect('index.php?c=transaction&a=dashboard');
+            }
+            $this->redirect('index.php?c=deposit&a=dashboard');
+        }
+
+        $this->view('auth/register', array(
+            'title' => 'Daftar Akun Nasabah — BOWO',
+            'error' => '',
+            'old'   => array('name' => '', 'username' => '', 'email' => '', 'phone' => '', 'address' => ''),
+            'flash' => $this->getFlash()
+        ));
+    }
+
+    public function store()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('index.php?c=auth&a=register');
+        }
+
+        $old = array(
+            'name'     => trim(isset($_POST['name']) ? (string)$_POST['name'] : ''),
+            'username' => trim(isset($_POST['username']) ? (string)$_POST['username'] : ''),
+            'email'    => trim(isset($_POST['email']) ? (string)$_POST['email'] : ''),
+            'phone'    => trim(isset($_POST['phone']) ? (string)$_POST['phone'] : ''),
+            'address'  => trim(isset($_POST['address']) ? (string)$_POST['address'] : '')
+        );
+        $password = isset($_POST['password']) ? $_POST['password'] : '';
+
+        $error = '';
+        if ($old['name'] === '' || $old['username'] === '' || $old['email'] === '' || $old['phone'] === '' || $old['address'] === '' || $password === '') {
+            $error = 'Semua kolom pendaftaran wajib diisi.';
+        } elseif (strlen($password) < 6) {
+            $error = 'Kata sandi minimal 6 karakter.';
+        } elseif ($this->userModel->findByUsername($old['username'])) {
+            $error = 'Username sudah digunakan, silakan pilih username lain.';
+        } elseif ($this->userModel->findByEmail($old['email'])) {
+            $error = 'Email sudah terdaftar, silakan gunakan email lain.';
+        }
+
+        if ($error !== '') {
+            $this->view('auth/register', array(
+                'title' => 'Daftar Akun Nasabah — BOWO',
+                'error' => $error,
+                'old'   => $old,
+                'flash' => null
+            ));
+            return;
+        }
+
+        $this->userModel->registerNasabah(array(
+            'name'     => $old['name'],
+            'username' => $old['username'],
+            'email'    => $old['email'],
+            'phone'    => $old['phone'],
+            'address'  => $old['address'],
+            'password' => $password
+        ));
+
+        setcookie('remember_username', $old['username'], time() + (86400 * 30), '/');
+        $this->setFlash('success', 'Pendaftaran berhasil! Silakan masuk menggunakan akun Anda.');
+        $this->redirect('index.php?c=auth&a=login');
+    }
+
     public function logout()
     {
         session_unset();
