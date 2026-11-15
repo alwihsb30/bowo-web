@@ -57,4 +57,49 @@ class WasteTypeController extends Controller
         $this->setFlash('success', 'Jenis sampah baru berhasil ditambahkan.');
         $this->redirect('index.php?c=wastetype&a=index');
     }
+
+    public function update()
+    {
+        $this->requireAdmin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('index.php?c=wastetype&a=index');
+        }
+
+        $id          = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $name        = trim(isset($_POST['name']) ? (string)$_POST['name'] : '');
+        $category    = trim(isset($_POST['category']) ? (string)$_POST['category'] : '');
+        $pricePerKg  = isset($_POST['price_per_kg']) ? (float)$_POST['price_per_kg'] : 0;
+        $description = trim(isset($_POST['description']) ? (string)$_POST['description'] : '');
+        $status      = (isset($_POST['status']) && $_POST['status'] === 'inactive') ? 'inactive' : 'active';
+
+        if ($id <= 0 || $name === '' || $category === '' || $pricePerKg <= 0) {
+            $this->setFlash('error', 'Data perubahan jenis sampah tidak lengkap.');
+            $this->redirect('index.php?c=wastetype&a=index');
+        }
+
+        $this->wasteTypeModel->updateWasteType($id, array(
+            'name'         => $name,
+            'category'     => $category,
+            'price_per_kg' => $pricePerKg,
+            'description'  => $description,
+            'status'       => $status
+        ));
+
+        $this->setFlash('success', 'Data jenis sampah berhasil diperbarui.');
+        $this->redirect('index.php?c=wastetype&a=index');
+    }
+
+    public function delete()
+    {
+        $this->requireAdmin();
+
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        if ($id > 0) {
+            $this->wasteTypeModel->deleteById($id);
+            $this->setFlash('success', 'Data jenis sampah berhasil dihapus.');
+        }
+
+        $this->redirect('index.php?c=wastetype&a=index');
+    }
 }

@@ -67,4 +67,18 @@ class WasteType extends Model
         $stmt = $this->db->prepare($sql);
         return $stmt->execute(array('id' => (int)$id));
     }
+
+    public function searchByKeyword($keyword = '')
+    {
+        $sql  = "SELECT * FROM waste_types
+                 WHERE name LIKE :kw1 OR category LIKE :kw2
+                 ORDER BY id DESC";
+        $like = '%' . $keyword . '%';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(array(
+            'kw1' => $like,
+            'kw2' => $like
+        ));
+        return $stmt->fetchAll();
+    }
 }
