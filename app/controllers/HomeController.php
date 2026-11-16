@@ -23,4 +23,11 @@ class HomeController extends Controller
             'waste_types'    => $this->wasteTypeModel->getActive()
         ));
     }
+    public function leaderboard()
+    {
+        $this->view('home/leaderboard', array(
+            'pageTitle' => 'Leaderboard Nasabah - BOWO',
+            'leaders'   => $this->userModel->getLeaderboard()
+        ));
+    }
 }
