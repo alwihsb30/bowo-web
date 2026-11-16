@@ -34,4 +34,81 @@ class Deposit extends Model
         $stmt->execute(array('user_id' => (int)$userId));
         return $stmt->fetchAll();
     }
+
+    public function getPendingWithDetails()
+    {
+        $sql = "SELECT d.*, u.name AS user_name, u.username AS user_username,
+                       w.name AS waste_name, w.category AS waste_category
+                FROM deposits d
+                JOIN users u ON d.user_id = u.id
+                JOIN waste_types w ON d.waste_type_id = w.id
+                WHERE d.status = 'menunggu'
+                ORDER BY d.id ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getAllWithDetails()
+    {
+        $sql = "SELECT d.*, u.name AS user_name, u.username AS user_username,
+                       w.name AS waste_name, w.category AS waste_category
+                FROM deposits d
+                JOIN users u ON d.user_id = u.id
+                JOIN waste_types w ON d.waste_type_id = w.id
+                ORDER BY d.id DESC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function getTotalVerifiedWeightByUser($userId)
+    {
+        $sql = "SELECT IFNULL(SUM(weight), 0)
+                FROM deposits
+                WHERE user_id = :user_id AND status = 'diverifikasi'";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(array('user_id' => (int)$userId));
+        return (float)$stmt->fetchColumn();
+    }
+
+    public function countByUser($userId)
+    {
+        $sql  = "SELECT COUNT(*) FROM deposits WHERE user_id = :user_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(array('user_id' => (int)$userId));
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function countPendingByUser($userId)
+    {
+        $sql  = "SELECT COUNT(*) FROM deposits WHERE user_id = :user_id AND status = 'menunggu'";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(array('user_id' => (int)$userId));
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getTotalVerifiedWeightAll()
+    {
+        $sql  = "SELECT IFNULL(SUM(weight), 0) FROM deposits WHERE status = 'diverifikasi'";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return (float)$stmt->fetchColumn();
+    }
+
+    public function getTotalVerifiedValueAll()
+    {
+        $sql  = "SELECT IFNULL(SUM(total_value), 0) FROM deposits WHERE status = 'diverifikasi'";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return (float)$stmt->fetchColumn();
+    }
+
+    public function countByStatus($status)
+    {
+        $sql  = "SELECT COUNT(*) FROM deposits WHERE status = :status";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(array('status' => $status));
+        return (int)$stmt->fetchColumn();
+    }
 }
