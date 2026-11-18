@@ -113,4 +113,19 @@ class DepositController extends Controller
         $this->setFlash('success', 'Pengajuan setoran sampah berhasil dikirim dan menunggu verifikasi Admin.');
         $this->redirect('index.php?c=deposit&a=history');
     }
+
+    public function history()
+    {
+        $this->requireNasabah();
+
+        $userId = (int)$_SESSION['user_id'];
+        $this->view('user/deposits', array(
+            'title'           => 'Riwayat Pengajuan Setoran — BOWO',
+            'deposits'        => $this->depositModel->getByUserWithWaste($userId),
+            'total_count'     => $this->depositModel->countByUser($userId),
+            'verified_weight' => $this->depositModel->getTotalVerifiedWeightByUser($userId),
+            'pending_count'   => $this->depositModel->countPendingByUser($userId),
+            'flash'           => $this->getFlash()
+        ));
+    }
 }
