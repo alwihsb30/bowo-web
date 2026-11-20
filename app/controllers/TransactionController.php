@@ -87,4 +87,35 @@ class TransactionController extends Controller
             'summary'       => array('users' => $this->userModel->countNasabah())
         ));
     }
+
+    public function exportCsv()
+    {
+        $this->requireAdmin();
+
+        $reports  = $this->depositModel->getAllWithDetails();
+        $fileName = 'laporan_bowo_' . date('Y-m-d') . '.csv';
+
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $fileName . '"');
+
+        $output = fopen('php://output', 'w');
+        fputcsv($output, array('ID', 'Tanggal', 'Nasabah', 'Jenis Sampah', 'Kategori', 'Berat (Kg)', 'Total Nilai (Rp)', 'Poin', 'Status'));
+
+        foreach ($reports as $row) {
+            fputcsv($output, array(
+                $row['id'],
+                $row['deposit_date'],
+                $row['user_name'],
+                $row['waste_name'],
+                $row['waste_category'],
+                $row['weight'],
+                $row['total_value'],
+                $row['points'],
+                $row['status']
+            ));
+        }
+
+        fclose($output);
+        exit;
+    }
 }
