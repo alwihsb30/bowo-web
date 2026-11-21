@@ -102,4 +102,22 @@ class WasteTypeController extends Controller
 
         $this->redirect('index.php?c=wastetype&a=index');
     }
+
+    public function search()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $keyword = isset($_GET['q']) ? trim((string)$_GET['q']) : '';
+        $rows    = $this->wasteTypeModel->searchByKeyword($keyword);
+
+        foreach ($rows as $idx => $row) {
+            $rows[$idx]['price_formatted'] = 'Rp ' . number_format((float)$row['price_per_kg'], 0, ',', '.');
+        }
+
+        echo json_encode(array(
+            'status' => 'success',
+            'data'   => $rows
+        ));
+        exit;
+    }
 }
