@@ -1,5 +1,6 @@
 <?php
-// Controller halaman publik (Beranda, Katalog Sampah, dan Leaderboard)
+// Controller untuk beranda publik dan papan peringkat Leaderboard
+
 class HomeController extends Controller
 {
     private $userModel;
@@ -16,18 +17,20 @@ class HomeController extends Controller
     public function index()
     {
         $this->view('home/index', array(
-            'pageTitle'      => 'Beranda - BOWO Bank Sampah',
+            'title'          => 'BOWO — Bank of Waste Online',
             'total_users'    => $this->userModel->countNasabah(),
             'total_waste'    => $this->depositModel->getTotalVerifiedWeightAll(),
-            'total_deposits' => $this->depositModel->countByStatus('approved'),
+            'total_deposits' => $this->depositModel->countByStatus('diverifikasi'),
+            'top_wastes'     => $this->wasteTypeModel->getTopDeposited(3),
             'waste_types'    => $this->wasteTypeModel->getActive()
         ));
     }
+
     public function leaderboard()
     {
         $this->view('home/leaderboard', array(
-            'pageTitle' => 'Leaderboard Nasabah - BOWO',
-            'leaders'   => $this->userModel->getLeaderboard()
+            'title'    => 'Leaderboard Eco-Hero — BOWO',
+            'rankings' => $this->userModel->getLeaderboard()
         ));
     }
 }

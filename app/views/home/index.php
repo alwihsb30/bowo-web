@@ -1,5 +1,5 @@
 <?php
-// Halaman beranda publik: statistik global dan katalog jenis sampah
+// Halaman beranda publik: statistik global, top 3 sampah terbanyak, dan katalog
 require __DIR__ . '/../layouts/header.php';
 $pubActive = 'beranda';
 require __DIR__ . '/../layouts/pub_header.php';
@@ -14,6 +14,18 @@ require __DIR__ . '/../layouts/pub_header.php';
             <span><strong class="mono"><?= number_format((float)$total_waste, 1) ?> Kg</strong> Terkumpul</span>
             <span class="meta-sep" aria-hidden="true">·</span>
             <span><strong class="mono"><?= number_format((int)$total_deposits) ?></strong> Setoran</span>
+        </div>
+    </section>
+
+    <section class="top-waste-band" aria-labelledby="top-waste-heading">
+        <h2 id="top-waste-heading" class="section-kicker">Jenis Sampah Terbanyak Disetor</h2>
+        <div class="top-waste-grid">
+            <?php foreach ($top_wastes as $idx => $tw): ?>
+                <div class="top-waste-item">
+                    <div class="top-waste-name">#<?= $idx + 1 ?> <?= htmlspecialchars($tw['name']) ?></div>
+                    <div class="top-waste-meta mono"><?= number_format((float)$tw['total_weight'], 1) ?> Kg terkumpul · Rp <?= number_format((float)$tw['price_per_kg'], 0, ',', '.') ?>/kg</div>
+                </div>
+            <?php endforeach; ?>
         </div>
     </section>
 

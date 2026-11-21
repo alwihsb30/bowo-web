@@ -27,6 +27,22 @@ class WasteType extends Model
         return $stmt->fetchAll();
     }
 
+    public function getTopDeposited($limit = 3)
+    {
+        $max = max(1, (int)$limit);
+        $sql = "SELECT w.id, w.name, w.price_per_kg,
+                       IFNULL(SUM(d.weight), 0) AS total_weight
+                FROM waste_types w
+                LEFT JOIN deposits d ON d.waste_type_id = w.id AND d.status = 'diverifikasi'
+                WHERE w.status = 'active'
+                GROUP BY w.id, w.name, w.price_per_kg
+                ORDER BY total_weight DESC, w.id ASC
+                LIMIT " . $max;
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     public function createWasteType($data)
     {
         $sql = "INSERT INTO waste_types (name, category, price_per_kg, description, status)
