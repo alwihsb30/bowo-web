@@ -1,6 +1,8 @@
-// Script interaktif BOWO: estimasi setoran dan pencarian AJAX jenis sampah admin
+// Script interaktif BOWO: estimasi setoran, toggle tabel ringkas, filter tabel, dan pencarian AJAX
 document.addEventListener('DOMContentLoaded', function () {
     initDepositCalculator();
+    initTableExpanders();
+    initClientSearch();
     initAdminAjaxSearch();
 });
 
@@ -27,11 +29,69 @@ function initDepositCalculator() {
     updateEstimate();
 }
 
-// 2. Pencarian AJAX jenis sampah pada panel Admin
+// Helper toggle kelas .is-compact (maksimal 10 baris)
+function setTableExpanded(table, btn, expand, rememberChoice) {
+    if (!table) return;
+    table.classList.toggle('is-compact', !expand);
+    if (rememberChoice) table.dataset.expanded = expand ? '1' : '0';
+    if (btn) {
+        btn.textContent = expand ? 'Tampilkan ringkas' : (btn.getAttribute('data-label') || btn.textContent);
+    }
+}
+
+// 2. Toggle tabel ringkas dan anchor #katalog pada Beranda
+function initTableExpanders() {
+    document.querySelectorAll('.js-expand-table').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var table = document.getElementById(btn.getAttribute('data-target'));
+            if (table) setTableExpanded(table, btn, table.classList.contains('is-compact'), true);
+        });
+    });
+
+    var catalogTable = document.getElementById('public-catalog-table');
+    var catalogBtn = document.getElementById('toggle-catalog-btn');
+    var navKatalog = document.getElementById('nav-katalog-link');
+    if (catalogTable && window.location.hash === '#katalog') setTableExpanded(catalogTable, catalogBtn, true, true);
+    if (navKatalog && catalogTable) {
+        navKatalog.addEventListener('click', function () {
+            setTableExpanded(catalogTable, catalogBtn, true, true);
+        });
+    }
+}
+
+// 3. Filter pencarian sisi klien untuk tabel publik, setoran, mutasi, dan laporan
+function initClientSearch() {
+    var configs = [
+        ['public-waste-search', '.waste-card', 'public-catalog-table'],
+        ['deposit-search-input', '.deposit-row', 'user-deposits-table'],
+        ['tx-search-input', '.tx-row', 'tx-history-table'],
+        ['report-search-input', '.report-row', 'admin-report-table']
+    ];
+    configs.forEach(function (cfg) {
+        var input = document.getElementById(cfg[0]);
+        if (!input) return;
+        var table = document.getElementById(cfg[2]);
+        var btn = document.querySelector('.js-expand-table[data-target="' + cfg[2] + '"]');
+
+        input.addEventListener('input', function () {
+            var keyword = input.value.toLowerCase().trim();
+            setTableExpanded(table, btn, keyword !== '' || (table && table.dataset.expanded === '1'), false);
+            document.querySelectorAll(cfg[1]).forEach(function (row) {
+                var match = keyword === '' || row.textContent.toLowerCase().indexOf(keyword) !== -1;
+                row.style.display = match ? '' : 'none';
+            });
+        });
+    });
+}
+
+// 4. Pencarian AJAX jenis sampah pada panel Admin
 function initAdminAjaxSearch() {
     var searchInput = document.getElementById('admin-waste-search');
     var tableBody = document.getElementById('admin-waste-tbody');
     if (!searchInput || !tableBody) return;
+
+    var table = document.getElementById('admin-waste-table');
+    var expandBtn = document.querySelector('.js-expand-table[data-target="admin-waste-table"]');
 
     searchInput.addEventListener('input', function () {
         var keyword = searchInput.value.trim();
@@ -47,11 +107,12 @@ function initAdminAjaxSearch() {
                 var html = '';
                 for (var i = 0; i < items.length; i++) {
                     var item = items[i];
+                    var cls = (i >= 10) ? ' class="extra-row"' : '';
                     var dot = (item.status === 'active')
                         ? '<span class="status-dot"><span class="dot dot-green"></span>Aktif</span>'
                         : '<span class="status-dot"><span class="dot dot-amber"></span>Nonaktif</span>';
 
-                    html += '<tr>' +
+                    html += '<tr' + cls + '>' +
                         '<td class="name-text">' + escapeHtml(item.name) + '</td>' +
                         '<td class="muted-text">' + escapeHtml(item.category) + '</td>' +
                         '<td class="mono">' + escapeHtml(item.price_formatted) + '</td>' +
@@ -63,6 +124,7 @@ function initAdminAjaxSearch() {
                         '<button type="submit" class="btn-sm">Hapus</button></form></div></td></tr>';
                 }
                 tableBody.innerHTML = html;
+                setTableExpanded(table, expandBtn, keyword !== '' || (table && table.dataset.expanded === '1'), false);
             });
     });
 }
