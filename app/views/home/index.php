@@ -37,25 +37,37 @@ require __DIR__ . '/../layouts/pub_header.php';
                        id="public-waste-search"
                        class="search-input"
                        placeholder="Cari jenis sampah...">
+                <?php if (!empty($waste_types)): ?>
+                    <button type="button"
+                            id="toggle-catalog-btn"
+                            class="btn-sm js-expand-table"
+                            data-target="public-catalog-table"
+                            data-label="Lihat semua &amp; rincian (<?= count($waste_types) ?>)">
+                        Lihat semua &amp; rincian (<?= count($waste_types) ?>)
+                    </button>
+                <?php endif; ?>
             </div>
         </div>
 
-        <table id="public-catalog-table">
+        <table id="public-catalog-table" class="is-compact">
             <thead>
                 <tr>
                     <th>Jenis Sampah</th>
                     <th>Kategori</th>
-                    <th>Deskripsi</th>
+                    <th class="col-detail">Deskripsi</th>
                     <th>Harga / Kg</th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($waste_types as $type): ?>
-                    <?php $desc = !empty($type['description']) ? $type['description'] : '-'; ?>
-                    <tr class="waste-card">
+                <?php foreach ($waste_types as $idx => $type): ?>
+                    <?php
+                    $rowClass = ($idx >= 10) ? 'waste-card extra-row' : 'waste-card';
+                    $desc     = !empty($type['description']) ? $type['description'] : '-';
+                    ?>
+                    <tr class="<?= $rowClass ?>">
                         <td class="name-text"><?= htmlspecialchars($type['name']) ?></td>
                         <td class="muted-text"><?= htmlspecialchars($type['category']) ?></td>
-                        <td class="muted-text"><?= htmlspecialchars($desc) ?></td>
+                        <td class="col-detail muted-text"><?= htmlspecialchars($desc) ?></td>
                         <td class="mono">Rp <?= number_format((float)$type['price_per_kg'], 0, ',', '.') ?></td>
                     </tr>
                 <?php endforeach; ?>
