@@ -78,10 +78,15 @@ body {
 .global-meta-strip strong { color: #1E2923; font-weight: 600; }
 .meta-sep { color: #C2BEB4; }
 
+.top-waste-band { padding: 24px 0 8px; border-top: 1px solid #E2DFD7; }
 .section-kicker { font-size: 12px; font-weight: 500; color: #646B66; margin-bottom: 14px; }
+.top-waste-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.top-waste-item { display: flex; flex-direction: column; gap: 5px; }
+.top-waste-name {
     font-size: 15px; font-weight: 600; color: #1E2923;
     letter-spacing: -0.015em; line-height: 1.35;
 }
+.top-waste-meta { font-size: 13px; color: #646B66; }
 
 .home-section-sep {
     margin-top: 32px; padding-top: 32px;
@@ -209,3 +214,23 @@ td:last-child { padding-right: 6px; white-space: nowrap; }
 .dot-green { background: #2D6A4F; }
 .dot-red { background: #C2413B; }
 .actions-inline { display: inline-flex; gap: 6px; align-items: center; justify-content: flex-start; }
+table.is-compact .col-detail,
+table.is-compact .extra-row { display: none; }
+
+/* 5. Responsif & Cetak */
+@media (max-width: 768px) {
+    .app-shell { grid-template-columns: 1fr; }
+    .left-rail { width: 100%; height: auto; position: static; }
+    .metrics-row,
+    .top-waste-grid,
+    .form-grid-2 { grid-template-columns: 1fr; }
+    .inline-form { flex-wrap: wrap; }
+    .activity-item { flex-direction: column; align-items: flex-start; }
+}
+
+@media print {
+    .left-rail, .btn-sm, .btn-primary, .search-input { display: none !important; }
+    .app-shell { display: block; }
+    .main-canvas { padding: 0; background: #FFFFFF; }
+    table.is-compact .extra-row { display: table-row; }
+}
